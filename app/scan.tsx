@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-na
 import { router } from 'expo-router';
 import { ArrowLeft, Camera, FolderOpen, X } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { httpMultipart } from '@/services/apiClient';
 
 export default function ScanScreen() {
   const [scannedImage, setScannedImage] = useState<string | null>(null);
@@ -43,8 +44,23 @@ export default function ScanScreen() {
     setScannedImage(null);
   };
 
-  const handleProceedToEvaluation = () => {
-    router.push('/evaluation-result');
+  const handleProceedToEvaluation = async () => {
+    if (!scannedImage) return;
+    try {
+      const fileName = scannedImage.split('/').pop() || 'scan.jpg';
+      const formData = new FormData();
+      // @ts-ignore - React Native FormData supports uri, type, name
+      formData.append('image', { uri: scannedImage, type: 'image/jpeg', name: fileName });
+      const result = await httpMultipart<{ text: string; confidence: number; message?: string }>(
+        '/evaluation/ocr/',
+        formData,
+        { method: 'POST' }
+      );
+      router.push({ pathname: '/evaluation-result', params: { text: result.text, confidence: String(result.confidence) } as any });
+    } catch (e: any) {
+      const msg = e?.details?.error || 'Failed to process image. Please try again.';
+      Alert.alert('OCR Error', msg);
+    }
   };
 
   return (

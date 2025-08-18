@@ -1,9 +1,12 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, RotateCcw, Download } from 'lucide-react-native';
 
 export default function EvaluationResultScreen() {
+  const params = useLocalSearchParams<{ text?: string; confidence?: string }>();
+  const extractedText = params.text || '—';
+  const confidence = params.confidence ? Math.round(parseFloat(params.confidence) * 100) : 50;
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -30,16 +33,14 @@ export default function EvaluationResultScreen() {
             <View style={styles.progressBar}>
               <View style={[styles.progressFill, { width: '50%' }]} />
             </View>
-            <Text style={styles.progressText}>50%</Text>
+            <Text style={styles.progressText}>{confidence}%</Text>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Strengths</Text>
+          <Text style={styles.sectionTitle}>Extracted Text</Text>
           <Text style={styles.sectionContent}>
-            Alex demonstrated a strong understanding of basic arithmetic operations, including 
-            addition and subtraction. Their calculations were accurate, and they showed a good 
-            grasp of number sense.
+            {extractedText}
           </Text>
         </View>
 
