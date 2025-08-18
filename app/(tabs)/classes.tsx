@@ -1,23 +1,50 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { Plus, Users, ChartBar as BarChart3, FileText } from 'lucide-react-native';
+import { httpJson } from '@/services/apiClient';
 
-const classes = [
-  { id: '1', name: 'Math 101', students: 15, evaluations: 45, color: '#ff9500' },
-  { id: '2', name: 'Science - Unit 2', students: 12, evaluations: 32, color: '#007AFF' },
-  { id: '3', name: 'English Literature', students: 18, evaluations: 58, color: '#FF6B6B' },
-  { id: '4', name: 'Physics Advanced', students: 10, evaluations: 28, color: '#34C759' },
-];
+type ClassGroup = {
+  id: number;
+  name: string;
+  description: string;
+  subject: string;
+  is_active: boolean;
+  student_count?: number;
+};
 
 export default function ClassesScreen() {
+  const [classes, setClasses] = useState<ClassGroup[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    httpJson<ClassGroup[]>('/classes/groups/')
+      .then(setClasses)
+      .catch(() => setClasses([]));
+  }, []);
+
+  const handleCreate = async () => {
+    try {
+      setLoading(true);
+      const created = await httpJson<ClassGroup>('/classes/groups/', {
+        method: 'POST',
+        body: { name: `New Class ${Date.now()}`, description: '', subject: 'General', is_active: true },
+      });
+      setClasses([created, ...classes]);
+    } catch (e: any) {
+      Alert.alert('Error', 'Failed to create class');
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Classes</Text>
         <TouchableOpacity 
           style={styles.addButton}
-          onPress={() => router.push('/class-groups')}
+          onPress={handleCreate}
+          disabled={loading}
         >
           <Plus size={20} color="#1a1a1a" />
         </TouchableOpacity>
@@ -41,21 +68,21 @@ export default function ClassesScreen() {
           <Text style={styles.sectionTitle}>Your Classes</Text>
           {classes.map((classItem) => (
             <TouchableOpacity key={classItem.id} style={styles.classCard}>
-              <View style={[styles.classColorBar, { backgroundColor: classItem.color }]} />
+              <View style={[styles.classColorBar, { backgroundColor: '#00ff88' }]} />
               <View style={styles.classContent}>
                 <View style={styles.classHeader}>
                   <Text style={styles.className}>{classItem.name}</Text>
-                  <View style={[styles.classIcon, { backgroundColor: classItem.color }]}>
+                  <View style={[styles.classIcon, { backgroundColor: '#00ff88' }]}> 
                     <Users size={16} color="#fff" />
                   </View>
                 </View>
                 <View style={styles.classStats}>
                   <View style={styles.classStat}>
-                    <Text style={styles.classStatNumber}>{classItem.students}</Text>
+                    <Text style={styles.classStatNumber}>{classItem.student_count ?? '—'}</Text>
                     <Text style={styles.classStatLabel}>Students</Text>
                   </View>
                   <View style={styles.classStat}>
-                    <Text style={styles.classStatNumber}>{classItem.evaluations}</Text>
+                    <Text style={styles.classStatNumber}>—</Text>
                     <Text style={styles.classStatLabel}>Evaluations</Text>
                   </View>
                 </View>

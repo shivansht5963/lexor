@@ -1,27 +1,50 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { ArrowLeft, Plus, Users } from 'lucide-react-native';
+import { httpJson } from '@/services/apiClient';
 
-const activeClasses = [
-  { id: '1', name: 'Math 101', students: 15, color: '#ff9500' },
-  { id: '2', name: 'Science - Unit 2', students: 12, color: '#007AFF' },
-  { id: '3', name: 'English Literature', students: 18, color: '#FF6B6B' },
-];
+type ClassGroup = {
+  id: number;
+  name: string;
+  description: string;
+  subject: string;
+  is_active: boolean;
+  student_count?: number;
+};
 
 export default function ClassGroupsScreen() {
   const [className, setClassName] = useState('');
   const [groupCode, setGroupCode] = useState('');
+  const [classes, setClasses] = useState<ClassGroup[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const handleCreateGroup = () => {
+  useEffect(() => {
+    httpJson<ClassGroup[]>('/classes/groups/')
+      .then(setClasses)
+      .catch(() => setClasses([]));
+  }, []);
+
+  const handleCreateGroup = async () => {
     if (!className.trim()) return;
-    // Mock create group functionality
-    setClassName('');
+    try {
+      setLoading(true);
+      const created = await httpJson<ClassGroup>('/classes/groups/', {
+        method: 'POST',
+        body: { name: className.trim(), description: '', subject: 'General', is_active: true },
+      });
+      setClasses([created, ...classes]);
+      setClassName('');
+    } catch (e: any) {
+      Alert.alert('Error', 'Failed to create class');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleJoinGroup = () => {
     if (!groupCode.trim()) return;
-    // Mock join group functionality
+    // No join endpoint in backend; keep placeholder
     setGroupCode('');
   };
 
@@ -73,17 +96,17 @@ export default function ClassGroupsScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Your Active Classes</Text>
-          {activeClasses.map((classItem) => (
+          {classes.map((classItem) => (
             <View key={classItem.id} style={styles.classCard}>
               <View style={styles.classContent}>
                 <Text style={styles.className}>{classItem.name}</Text>
-                <Text style={styles.studentCount}>{classItem.students} students</Text>
+                <Text style={styles.studentCount}>{classItem.student_count ?? 0} students</Text>
               </View>
               <View style={styles.classActions}>
                 <TouchableOpacity style={styles.viewButton}>
                   <Text style={styles.viewButtonText}>View</Text>
                 </TouchableOpacity>
-                <View style={[styles.classIcon, { backgroundColor: classItem.color }]}>
+                <View style={[styles.classIcon, { backgroundColor: '#00ff88' }]}> 
                   <Users size={20} color="#fff" />
                 </View>
               </View>
