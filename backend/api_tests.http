@@ -1,0 +1,212 @@
+### Bolt Expo Backend API Tests
+### Use VS Code REST Client extension to run these tests
+
+@baseUrl = http://127.0.0.1:8000/api
+@token = YOUR_TOKEN_HERE
+
+### 1. Test Server Health
+GET {{baseUrl}}/auth/register/
+Content-Type: application/json
+
+###
+
+### 2. Register New User
+POST {{baseUrl}}/auth/register/
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "gmail": "test@example.com",
+    "password": "testpass123",
+    "password_confirm": "testpass123",
+    "first_name": "Test",
+    "last_name": "User",
+    "is_teacher": true
+}
+
+###
+
+### 3. Login User (Save the token from response)
+POST {{baseUrl}}/auth/login/
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "password": "testpass123"
+}
+
+###
+
+### 4. Get User Profile
+GET {{baseUrl}}/auth/profile/
+Authorization: Token {{token}}
+
+###
+
+### 5. Check Username Availability
+POST {{baseUrl}}/auth/check-username/
+Content-Type: application/json
+
+{
+    "username": "newuser"
+}
+
+###
+
+### 6. Create Class Group
+POST {{baseUrl}}/classes/groups/
+Content-Type: application/json
+Authorization: Token {{token}}
+
+{
+    "name": "Mathematics 101",
+    "description": "Basic Mathematics Course",
+    "subject": "Mathematics",
+    "is_active": true
+}
+
+###
+
+### 7. List Class Groups
+GET {{baseUrl}}/classes/groups/
+Authorization: Token {{token}}
+
+###
+
+### 8. Get Dashboard Stats
+GET {{baseUrl}}/classes/dashboard-stats/
+Authorization: Token {{token}}
+
+###
+
+### 9. Add Student to Class (replace class_group with actual ID)
+POST {{baseUrl}}/classes/students/
+Content-Type: application/json
+Authorization: Token {{token}}
+
+{
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "student_id": "STU001",
+    "class_group": 1
+}
+
+###
+
+### 10. Create Evaluation
+POST {{baseUrl}}/evaluation/evaluations/
+Content-Type: application/json
+Authorization: Token {{token}}
+
+{
+    "student": 1,
+    "class_group": 1,
+    "title": "Math Quiz 1",
+    "evaluation_type": "quiz",
+    "score": 85,
+    "max_score": 100,
+    "feedback": "Good work on algebra problems!",
+    "evaluation_date": "2024-12-20T10:00:00Z"
+}
+
+###
+
+### 11. Get Evaluation Stats
+GET {{baseUrl}}/evaluation/evaluations/stats/
+Authorization: Token {{token}}
+
+###
+
+### 12. Test OCR (with image file - update path)
+POST {{baseUrl}}/evaluation/ocr/
+Authorization: Token {{token}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< ./path/to/test/image.jpg
+--boundary--
+
+###
+
+### 13. Create Cheating Detection
+POST {{baseUrl}}/cheating-detection/detections/
+Content-Type: application/json
+Authorization: Token {{token}}
+
+{
+    "class_group": 1,
+    "student": 1,
+    "input_data": "Student behavior analysis data"
+}
+
+###
+
+### 14. Get Cheating Detection Stats
+GET {{baseUrl}}/cheating-detection/detections/stats/
+Authorization: Token {{token}}
+
+###
+
+### 15. Export Report
+POST {{baseUrl}}/reports/export/
+Content-Type: application/json
+Authorization: Token {{token}}
+
+{
+    "title": "Class Progress Report",
+    "report_type": "class_summary",
+    "class_group": 1,
+    "include_charts": true,
+    "include_detailed_feedback": true
+}
+
+###
+
+### 16. Get Report History
+GET {{baseUrl}}/reports/history/
+Authorization: Token {{token}}
+
+###
+
+### 17. Search Students
+GET {{baseUrl}}/classes/search-students/?q=John
+Authorization: Token {{token}}
+
+###
+
+### 18. Get Student Progress (replace with actual student ID)
+GET {{baseUrl}}/evaluation/student-progress/1/
+Authorization: Token {{token}}
+
+###
+
+### 19. Test Bulk Student Creation
+POST {{baseUrl}}/classes/groups/1/add_students_bulk/
+Content-Type: application/json
+Authorization: Token {{token}}
+
+{
+    "students": [
+        {
+            "name": "Alice Johnson",
+            "email": "alice@example.com",
+            "student_id": "STU002"
+        },
+        {
+            "name": "Bob Wilson",
+            "email": "bob@example.com",
+            "student_id": "STU003"
+        }
+    ]
+}
+
+###
+
+### 20. Logout
+POST {{baseUrl}}/auth/logout/
+Authorization: Token {{token}}
+
+###

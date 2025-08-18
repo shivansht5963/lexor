@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { User, Settings, CircleHelp as HelpCircle, FileText, Bell, Lock, LogOut, ChevronRight } from 'lucide-react-native';
+import { authService, type UserProfile } from '@/services/authService';
 
 const menuItems = [
   { id: 'account', title: 'Account Settings', icon: Settings, subtitle: 'Manage your profile' },
@@ -12,6 +13,12 @@ const menuItems = [
 ];
 
 export default function ProfileScreen() {
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    authService.fetchProfile().then(setProfile).catch(() => setProfile(null));
+  }, []);
+
   const handleLogout = () => {
     Alert.alert(
       'Logout',
@@ -21,7 +28,10 @@ export default function ProfileScreen() {
         { 
           text: 'Logout', 
           style: 'destructive',
-          onPress: () => router.replace('/auth/login')
+          onPress: async () => {
+            await authService.logout();
+            router.replace('/auth/login');
+          }
         },
       ]
     );
@@ -39,9 +49,9 @@ export default function ProfileScreen() {
             <User size={40} color="#1a1a1a" />
           </View>
           <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>Sarah Johnson</Text>
-            <Text style={styles.profileEmail}>sarah.johnson@school.edu</Text>
-            <Text style={styles.profileRole}>Mathematics Teacher</Text>
+            <Text style={styles.profileName}>{profile?.full_name || profile?.username || 'User'}</Text>
+            <Text style={styles.profileEmail}>{profile?.gmail || ''}</Text>
+            <Text style={styles.profileRole}>{profile?.is_teacher ? 'Teacher' : 'User'}</Text>
           </View>
         </View>
 

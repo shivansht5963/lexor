@@ -61,7 +61,9 @@ This is a cross-platform mobile and web application built with Expo, React Nativ
    ```
 2. **Start the app:**
    ```sh
-   npx expo start
+   # Ensure the backend is running on http://localhost:8000
+   # Then expose the API base URL to the app
+   EXPO_PUBLIC_API_URL=http://localhost:8000/api npx expo start
    ```
    - Scan the QR code with Expo Go (Android/iOS) or open the web version at http://localhost:8081
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import { Link, router } from 'expo-router';
 import { Eye, EyeOff, Mail, Lock, User, Check } from 'lucide-react-native';
+import { authService } from '@/services/authService';
 
 export default function SignupScreen() {
   const [name, setName] = useState('');
@@ -30,12 +31,29 @@ export default function SignupScreen() {
     }
 
     setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const [first_name, ...lastParts] = name.trim().split(' ');
+      const last_name = lastParts.join(' ');
+      const username = email.split('@')[0];
+      const result = await authService.signup({
+        username,
+        gmail: email,
+        first_name,
+        last_name,
+        password,
+        password_confirm: confirmPassword,
+        is_teacher: true,
+      });
       setLoading(false);
-      router.replace('/(tabs)');
-    }, 1500);
+      if (result.success) {
+        router.replace('/(tabs)');
+      } else {
+        Alert.alert('Signup Failed', result.error || 'Please review your details');
+      }
+    } catch (e) {
+      setLoading(false);
+      Alert.alert('Signup Error', 'Something went wrong. Please try again.');
+    }
   };
 
   return (

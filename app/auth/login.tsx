@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Link, router } from 'expo-router';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react-native';
+import { authService } from '@/services/authService';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -16,12 +17,18 @@ export default function LoginScreen() {
     }
 
     setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const result = await authService.login(email, password);
       setLoading(false);
-      router.replace('/(tabs)');
-    }, 1500);
+      if (result.success) {
+        router.replace('/(tabs)');
+      } else {
+        Alert.alert('Login Failed', result.error || 'Please check your credentials');
+      }
+    } catch (e) {
+      setLoading(false);
+      Alert.alert('Login Error', 'Something went wrong. Please try again.');
+    }
   };
 
   return (
