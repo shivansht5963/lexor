@@ -37,6 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'custom_auth',
+    'classes',
+    'cheating_detection',
+    'evaluation',
+    'report',
 ]
 
 MIDDLEWARE = [
@@ -79,6 +85,7 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = 'custom_auth.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
