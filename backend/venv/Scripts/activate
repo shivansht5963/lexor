@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\Shivansh\Downloads\project-bolt\project\backend\venv"
+VIRTUAL_ENV="C:\Users\Shivansh\lexorfront_backend_conneted\lexor\backend\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
