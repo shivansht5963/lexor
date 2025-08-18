@@ -1,8 +1,8 @@
 ### Bolt Expo Backend API Tests
 ### Use VS Code REST Client extension to run these tests
 
-@baseUrl = http://127.0.0.1:8000/api
-@token = 82f6a32d6897d006e00669ee18c9ef5824ef2274
+@baseUrl = http://192.168.1.108:8000/api
+@token = 
 
 ### 1. Test Server Health
 GET {{baseUrl}}/auth/register/
@@ -15,11 +15,11 @@ POST {{baseUrl}}/auth/register/
 Content-Type: application/json
 
 {
-    "username": "testuser",
-    "gmail": "test@example.com",
+    "username": "offeruser",
+    "gmail": "offer6849@gmail.com",
     "password": "testpass123",
     "password_confirm": "testpass123",
-    "first_name": "Test",
+    "first_name": "offer",
     "last_name": "User",
     "is_teacher": true
 }

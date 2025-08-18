@@ -4,7 +4,8 @@
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 // Prefer env, fall back to localhost for development
-export const API_BASE_URL: string = (process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api').replace(/\/$/, '');
+// IMPORTANT: Replace with your computer's local IP address for mobile access
+export const API_BASE_URL: string = (process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.108:8000/api').replace(/\/$/, '');
 
 let inMemoryAuthToken: string | null = null;
 
