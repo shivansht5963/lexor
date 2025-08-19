@@ -2,7 +2,7 @@
 ### Use VS Code REST Client extension to run these tests
 
 @baseUrl = http://127.0.0.1:8000/api
-@token = YOUR_TOKEN_HERE
+@token = d6045ff6f73185e7aa94ffd03c0757ff6f1ad085
 
 ### 1. Test Server Health
 GET {{baseUrl}}/auth/register/
