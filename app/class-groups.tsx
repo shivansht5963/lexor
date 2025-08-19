@@ -16,15 +16,9 @@ export default function ClassGroupsScreen() {
   const [studentId, setStudentId] = useState('');
 
   useEffect(() => {
-<<<<<<< HEAD
-    listClassGroups()
-      .then((result) => setClasses(Array.isArray(result) ? result : []))
-      .catch(() => setClasses([]));
-=======
     listClassGroups().then((data) => setClasses(Array.isArray(data) ? data : [])).catch(() => setClasses([]));
->>>>>>> 848f703b3c9a8fbd8e3ada530d2dc6368e145400
   }, []);
-
+  
   useEffect(() => {
     if (selectedClassId) {
       listStudentsInClass(selectedClassId).then((data) => setStudents(Array.isArray(data) ? data : [])).catch(() => setStudents([]));
