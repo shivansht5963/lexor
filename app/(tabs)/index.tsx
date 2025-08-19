@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-nati
 import { router } from 'expo-router';
 import { Camera, FileCheck, FileText, CircleHelp as HelpCircle, Shield, ChartBar as BarChart3, Download, Users } from 'lucide-react-native';
 import { fetchDashboardStats, type DashboardStats } from '@/services/classService';
-import { fetchEvaluationStats, type EvaluationStats } from '@/services/evaluationService';
+import { fetchEvaluationStats, fetchOcrRequestCount, type EvaluationStats } from '@/services/evaluationService';
 
 const quickActions = [
   { id: 'scan', title: 'Scan', subtitle: 'Answer Sheet', icon: Camera, route: '/scan' },
@@ -19,10 +19,12 @@ const quickActions = [
 export default function HomeScreen() {
   const [classStats, setClassStats] = useState<DashboardStats | null>(null);
   const [evalStats, setEvalStats] = useState<EvaluationStats | null>(null);
+  const [ocrCount, setOcrCount] = useState<number | null>(null);
 
   useEffect(() => {
     fetchDashboardStats().then(setClassStats).catch(() => setClassStats(null));
     fetchEvaluationStats().then(setEvalStats).catch(() => setEvalStats(null));
+    fetchOcrRequestCount().then(setOcrCount).catch(() => setOcrCount(null));
   }, []);
 
   const renderQuickAction = (action: typeof quickActions[0]) => {
@@ -65,6 +67,10 @@ export default function HomeScreen() {
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>{evalStats?.total_evaluations ?? '—'}</Text>
           <Text style={styles.statLabel}>Total Evaluations</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>{ocrCount ?? '—'}</Text>
+          <Text style={styles.statLabel}>OCR Scans</Text>
         </View>
       </View>
 

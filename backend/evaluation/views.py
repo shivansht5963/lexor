@@ -253,6 +253,13 @@ class OCRView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         
         try:
+            # Persist input as OCRRequest first
+            ocr_request = OCRRequest.objects.create(
+                user=request.user,
+                input_file=image_file,
+                file_name=getattr(image_file, 'name', 'upload')
+            )
+
             if VISION_AVAILABLE and os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'):
                 # Use actual Google Cloud Vision
                 client = vision.ImageAnnotatorClient()
@@ -266,15 +273,26 @@ class OCRView(APIView):
                 
                 detected_text = texts[0].description if texts else ''
                 confidence = texts[0].confidence if texts else 0
-                
+                ocr_request.result_text = detected_text
+                ocr_request.confidence_scores = { 'overall': confidence }
+                ocr_request.detected_languages = []
+                ocr_request.status = 'completed'
+                ocr_request.processed_at = timezone.now()
+                ocr_request.save()
             else:
                 # Use mock OCR
                 detected_text = "Mock OCR result: This is sample extracted text from the uploaded image."
                 confidence = 0.85
+                ocr_request.result_text = detected_text
+                ocr_request.confidence_scores = { 'overall': confidence }
+                ocr_request.status = 'completed'
+                ocr_request.processed_at = timezone.now()
+                ocr_request.save()
             
             return Response({
                 'text': detected_text,
                 'confidence': confidence,
+                'ocr_request_id': ocr_request.id,
                 'message': 'OCR processing completed'
             })
             
