@@ -2,37 +2,36 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { ArrowLeft, Plus, Users } from 'lucide-react-native';
-import { httpJson } from '@/services/apiClient';
-
-type ClassGroup = {
-  id: number;
-  name: string;
-  description: string;
-  subject: string;
-  is_active: boolean;
-  student_count?: number;
-};
+import { listClassGroups, createClassGroup, addStudentToClass, listStudentsInClass, type ClassGroup, type Student } from '@/services/classService';
 
 export default function ClassGroupsScreen() {
   const [className, setClassName] = useState('');
   const [groupCode, setGroupCode] = useState('');
   const [classes, setClasses] = useState<ClassGroup[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [studentName, setStudentName] = useState('');
+  const [studentEmail, setStudentEmail] = useState('');
+  const [studentId, setStudentId] = useState('');
 
   useEffect(() => {
-    httpJson<ClassGroup[]>('/classes/groups/')
-      .then(setClasses)
-      .catch(() => setClasses([]));
+    listClassGroups().then(setClasses).catch(() => setClasses([]));
   }, []);
+
+  useEffect(() => {
+    if (selectedClassId) {
+      listStudentsInClass(selectedClassId).then(setStudents).catch(() => setStudents([]));
+    } else {
+      setStudents([]);
+    }
+  }, [selectedClassId]);
 
   const handleCreateGroup = async () => {
     if (!className.trim()) return;
     try {
       setLoading(true);
-      const created = await httpJson<ClassGroup>('/classes/groups/', {
-        method: 'POST',
-        body: { name: className.trim(), description: '', subject: 'General', is_active: true },
-      });
+      const created = await createClassGroup({ name: className.trim(), description: '', subject: 'General', is_active: true });
       setClasses([created, ...classes]);
       setClassName('');
     } catch (e: any) {
@@ -46,6 +45,20 @@ export default function ClassGroupsScreen() {
     if (!groupCode.trim()) return;
     // No join endpoint in backend; keep placeholder
     setGroupCode('');
+  };
+
+  const handleAddStudent = async () => {
+    if (!selectedClassId || !studentName || !studentEmail || !studentId) return;
+    try {
+      setLoading(true);
+      const created = await addStudentToClass(selectedClassId, { name: studentName, email: studentEmail, student_id: studentId });
+      setStudents([created, ...students]);
+      setStudentName(''); setStudentEmail(''); setStudentId('');
+    } catch (e) {
+      Alert.alert('Error', 'Failed to add student');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -103,7 +116,7 @@ export default function ClassGroupsScreen() {
                 <Text style={styles.studentCount}>{classItem.student_count ?? 0} students</Text>
               </View>
               <View style={styles.classActions}>
-                <TouchableOpacity style={styles.viewButton}>
+                <TouchableOpacity style={styles.viewButton} onPress={() => setSelectedClassId(classItem.id)}>
                   <Text style={styles.viewButtonText}>View</Text>
                 </TouchableOpacity>
                 <View style={[styles.classIcon, { backgroundColor: '#00ff88' }]}> 
@@ -113,6 +126,29 @@ export default function ClassGroupsScreen() {
             </View>
           ))}
         </View>
+
+        {selectedClassId && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Students in Selected Class</Text>
+            <View style={{ gap: 8 }}>
+              {students.map((s) => (
+                <View key={s.id} style={{ backgroundColor: '#2a2a2a', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: '#333' }}>
+                  <Text style={{ color: '#fff', fontFamily: 'Inter-SemiBold' }}>{s.name}</Text>
+                  <Text style={{ color: '#999' }}>{s.email} • {s.student_id}</Text>
+                </View>
+              ))}
+            </View>
+
+            <View style={{ height: 16 }} />
+            <Text style={styles.sectionTitle}>Add Student</Text>
+            <TextInput style={styles.input} placeholder="Student Name" placeholderTextColor="#666" value={studentName} onChangeText={setStudentName} />
+            <TextInput style={styles.input} placeholder="Student Email" placeholderTextColor="#666" value={studentEmail} onChangeText={setStudentEmail} autoCapitalize="none" />
+            <TextInput style={styles.input} placeholder="Student ID" placeholderTextColor="#666" value={studentId} onChangeText={setStudentId} autoCapitalize="none" />
+            <TouchableOpacity style={[styles.createButton, (!(studentName&&studentEmail&&studentId) || loading) && styles.buttonDisabled]} onPress={handleAddStudent} disabled={!(studentName&&studentEmail&&studentId) || loading}>
+              <Text style={styles.createButtonText}>Add Student</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
     </View>
   );

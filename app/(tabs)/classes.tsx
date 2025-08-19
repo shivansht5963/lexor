@@ -2,34 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { Plus, Users, ChartBar as BarChart3, FileText } from 'lucide-react-native';
-import { httpJson } from '@/services/apiClient';
-
-type ClassGroup = {
-  id: number;
-  name: string;
-  description: string;
-  subject: string;
-  is_active: boolean;
-  student_count?: number;
-};
+import { createClassGroup, listClassGroups, type ClassGroup } from '@/services/classService';
 
 export default function ClassesScreen() {
   const [classes, setClasses] = useState<ClassGroup[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    httpJson<ClassGroup[]>('/classes/groups/')
-      .then(setClasses)
-      .catch(() => setClasses([]));
+    listClassGroups().then(setClasses).catch(() => setClasses([]));
   }, []);
 
   const handleCreate = async () => {
     try {
       setLoading(true);
-      const created = await httpJson<ClassGroup>('/classes/groups/', {
-        method: 'POST',
-        body: { name: `New Class ${Date.now()}`, description: '', subject: 'General', is_active: true },
-      });
+      const created = await createClassGroup({ name: `New Class ${Date.now()}`, description: '', subject: 'General', is_active: true });
       setClasses([created, ...classes]);
     } catch (e: any) {
       Alert.alert('Error', 'Failed to create class');

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { Camera, FileCheck, FileText, CircleHelp as HelpCircle, Shield, ChartBar as BarChart3, Download, Users } from 'lucide-react-native';
-import { httpJson } from '@/services/apiClient';
+import { fetchDashboardStats, type DashboardStats } from '@/services/classService';
+import { fetchEvaluationStats, type EvaluationStats } from '@/services/evaluationService';
 
 const quickActions = [
   { id: 'scan', title: 'Scan', subtitle: 'Answer Sheet', icon: Camera, route: '/scan' },
@@ -15,22 +16,13 @@ const quickActions = [
   { id: 'classes', title: 'Class Groups', subtitle: 'Manage Students', icon: Users, route: '/class-groups' },
 ];
 
-type DashboardStats = {
-  total_classes: number;
-  active_classes: number;
-  total_students: number;
-  active_students: number;
-  recent_classes: Array<any>;
-  classes_with_most_students: Array<any>;
-};
-
 export default function HomeScreen() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [classStats, setClassStats] = useState<DashboardStats | null>(null);
+  const [evalStats, setEvalStats] = useState<EvaluationStats | null>(null);
 
   useEffect(() => {
-    httpJson<DashboardStats>('/classes/dashboard-stats/')
-      .then(setStats)
-      .catch(() => setStats(null));
+    fetchDashboardStats().then(setClassStats).catch(() => setClassStats(null));
+    fetchEvaluationStats().then(setEvalStats).catch(() => setEvalStats(null));
   }, []);
 
   const renderQuickAction = (action: typeof quickActions[0]) => {
@@ -63,16 +55,16 @@ export default function HomeScreen() {
 
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{stats?.total_students ?? '—'}</Text>
+          <Text style={styles.statNumber}>{classStats?.total_students ?? '—'}</Text>
           <Text style={styles.statLabel}>Total Students</Text>
         </View>
         <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{stats?.active_classes ?? '—'}</Text>
+          <Text style={styles.statNumber}>{classStats?.active_classes ?? '—'}</Text>
           <Text style={styles.statLabel}>Active Classes</Text>
         </View>
         <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{stats?.total_classes ?? '—'}</Text>
-          <Text style={styles.statLabel}>Total Classes</Text>
+          <Text style={styles.statNumber}>{evalStats?.total_evaluations ?? '—'}</Text>
+          <Text style={styles.statLabel}>Total Evaluations</Text>
         </View>
       </View>
 
