@@ -9,7 +9,7 @@ export default function ClassesScreen() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    listClassGroups().then(setClasses).catch(() => setClasses([]));
+    listClassGroups().then((data) => setClasses(Array.isArray(data) ? data : [])).catch(() => setClasses([]));
   }, []);
 
   const handleCreate = async () => {

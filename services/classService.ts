@@ -21,7 +21,10 @@ export type Student = {
 };
 
 export async function listClassGroups(): Promise<ClassGroup[]> {
-	return await httpJson<ClassGroup[]>('/classes/groups/');
+	const resp = await httpJson<any>('/classes/groups/');
+	if (Array.isArray(resp)) return resp as ClassGroup[];
+	if (resp && Array.isArray(resp.results)) return resp.results as ClassGroup[];
+	return [];
 }
 
 export async function createClassGroup(payload: { name: string; description?: string; subject?: string; is_active?: boolean; }): Promise<ClassGroup> {
@@ -29,7 +32,10 @@ export async function createClassGroup(payload: { name: string; description?: st
 }
 
 export async function listStudentsInClass(classId: number): Promise<Student[]> {
-	return await httpJson<Student[]>(`/classes/groups/${classId}/students/`);
+	const resp = await httpJson<any>(`/classes/groups/${classId}/students/`);
+	if (Array.isArray(resp)) return resp as Student[];
+	if (resp && Array.isArray(resp.results)) return resp.results as Student[];
+	return [];
 }
 
 export async function addStudentToClass(classId: number, payload: { name: string; email: string; student_id: string; }): Promise<Student> {
